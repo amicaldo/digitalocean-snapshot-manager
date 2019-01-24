@@ -1,0 +1,5 @@
+__maintainer__: str = 'Jannik Hauptvogel'
+__author__: str = 'Jannik Hauptvogel'
+__email__: str = 'hauptvogel@amicaldo.de'
+__license__: str = 'GPLv2'
+__version__: str = '0.1.0'
