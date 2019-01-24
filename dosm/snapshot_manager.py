@@ -98,7 +98,9 @@ class SnapshotManager:
             if self.__logger:
                 self.__logger.info('Creating snapshot for volume %s' % volume.name)
 
-            snapshots.append(volume.snapshot(name=name))
+            snapshots.append(self.__amend_snapshot(
+                snapshot=volume.snapshot(name=name)
+            ))
 
         trash: list = self.__filter_snapshots_by_rules(
             snapshots=snapshots,
