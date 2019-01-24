@@ -52,6 +52,9 @@ snapman.add_volume_entry(
 # Remove volume entry
 snapman.remove_volume_entry_by_uuid(uuid=volumes[0].uuid)
 
+# Run the main loop just once
+snapman.run_once()
+
 # Start the main loop every 30 minutes (1800 seconds)
 snapman.run(interval=1800)
 ```

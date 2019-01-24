@@ -155,6 +155,9 @@ class SnapshotManager:
         self.__confman.remove_volume_entry_by_uuid(uuid=uuid)
 
     def run(self, interval: int):
+        threading.Timer(interval, self.run_once).start()
+
+    def run_once(self):
         self.__date_now: object = datetime.now()
         self.__entries: list = self.__confman.list_volume_entries()
         self.__volumes: list = self.__do_api.list_volumes()
@@ -167,5 +170,3 @@ class SnapshotManager:
                 self.__logger.info('Processing entry %s' % entry['name'])
 
             self.__process_entry(entry=entry)
-
-        threading.Timer(interval, self.run, [interval]).start()
