@@ -56,7 +56,7 @@ snapman.remove_volume_entry_by_uuid(uuid=volumes[0].uuid)
 snapman.run_once()
 
 # Start the main loop every 30 minutes (1800 seconds)
-snapman.run(interval=1800)
+snapman.run_loop(interval=1800)
 ```
 
 # Author

@@ -156,7 +156,7 @@ class SnapshotManager:
     def remove_volume_entry_by_uuid(self, uuid: str):
         self.__confman.remove_volume_entry_by_uuid(uuid=uuid)
 
-    def run(self, interval: int):
+    def run_loop(self, interval: int):
         threading.Timer(interval, self.run_once).start()
 
     def run_once(self):
