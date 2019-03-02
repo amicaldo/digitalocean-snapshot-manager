@@ -45,37 +45,48 @@ class SnapshotManager:
         oldest: object = None
 
         for snapshot in snapshots:
-            if not oldest or oldest.created_at > snapshot.created_at:
+            if not oldest or snapshot.created_at < oldest.created_at:
                 oldest: object = snapshot
 
         return oldest
 
-    def __get_newest_snapshot(self, snapshots: list) -> object:
-        newest: object = None
+    def __get_youngest_snapshot(self, snapshots: list) -> object:
+        youngest: object = None
 
         for snapshot in snapshots:
-            if not newest or newest.created_at < snapshot.created_at:
-                newest: object = snapshot
+            if not youngest or snapshot.created_at > youngest.created_at:
+                youngest: object = snapshot
 
-        return newest
+        return youngest
 
     def __filter_snapshots_by_rules(self, snapshots: list, rules: list) -> dict:
+        time_now: object = datetime.now()
+        trash: list = []
+
         for rule in rules:
             delta: object = timedelta(hours=rule)
 
             later: list = [
-                s for s in snapshots if (s.created_at + delta) >= self.__date_now
+                s for s in snapshots
+                if (s.created_at + delta) < time_now
+                and s not in trash
             ]
 
             if later:
-                protected: object = self.__get_newest_snapshot(later)
+                protected: object = self.__get_youngest_snapshot(later)
+
+                snapshots.remove(protected)
+                later.remove(protected)
+
+                for s in later:
+                    trash.append(s)
             else:
                 protected: object = self.__get_oldest_snapshot(snapshots)
 
-            if protected:
-                snapshots.remove(protected)
+                if protected:
+                    snapshots.remove(protected)
 
-        return snapshots
+        return trash
 
     def __process_snapshots(self, entry: dict, volume: object, snapshots: list):
         if not entry['rules']:
@@ -86,10 +97,10 @@ class SnapshotManager:
 
         entry['rules'].sort(reverse=True)
 
-        newest: object = self.__get_newest_snapshot(snapshots)
+        youngest: object = self.__get_youngest_snapshot(snapshots)
         delta: object = timedelta(hours=entry['rules'][-1])
 
-        if not newest or newest.created_at < datetime.now() - delta:
+        if not youngest or youngest.created_at < (datetime.now() - delta):
             name: str = '%s_%s' % (
                 volume.name,
                 datetime.now().strftime(self.__time_format)
@@ -160,7 +171,6 @@ class SnapshotManager:
         threading.Timer(interval, self.run_once).start()
 
     def run_once(self):
-        self.__date_now: object = datetime.now()
         self.__entries: list = self.__confman.list_volume_entries()
         self.__volumes: list = self.__do_api.list_volumes()
 
